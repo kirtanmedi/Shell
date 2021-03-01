@@ -72,10 +72,10 @@ int processInput(char **argList) {
     //if built in commands
     const char *builtInCommands[4];
     int i;
-    builtInCommands[0] = "help\n";
+    builtInCommands[0] = "help";
     builtInCommands[1] = "cd";
-    builtInCommands[2] = "exit\n";
-    builtInCommands[3] = "quit\n";
+    builtInCommands[2] = "exit";
+    builtInCommands[3] = "quit";
     for (i = 0; i < 4; i++) {
         if (strcmp(argList[0], builtInCommands[i]) == 0) {
             return 0;
@@ -108,10 +108,10 @@ void exitSh() {
 
 void runBuiltIn(char **argList) {
     const char *builtInCommands[4];
-    builtInCommands[0] = "help\n";
+    builtInCommands[0] = "help";
     builtInCommands[1] = "cd";
-    builtInCommands[2] = "exit\n";
-    builtInCommands[3] = "quit\n";
+    builtInCommands[2] = "exit";
+    builtInCommands[3] = "quit";
 
     if (strcmp(argList[0], builtInCommands[0]) == 0) {
         helpSh();
@@ -137,10 +137,13 @@ void shell() {
     char *inputLine;
     char **argList;
     int commandType = 1;
+    int inputLen;
 
     while (1) {
         printPrompt();
         inputLine = readLine();
+        inputLen = strlen(inputLine);
+        inputLine[inputLen-1] = 0;
         argList = parseInput(inputLine);
         commandType = processInput(argList);
         if (commandType == 0) {           //to run built in commands
