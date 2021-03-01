@@ -12,6 +12,8 @@ void helpSh() {
 }
 
 //built in cd command
+//changed directory to the passed in directory
+//gives error if directory is null or does not exist
 void cdSh(char *newDir) {
     if (newDir == NULL) {
         printf("Please enter a file or directory.\n");
@@ -29,6 +31,7 @@ void exitSh() {
 }
 
 //run built in commands
+//argList is the list that holds the commands
 void runBuiltIn(char **argList) {
     const char *builtInCommands[4];
     builtInCommands[0] = "help";
@@ -48,6 +51,7 @@ void runBuiltIn(char **argList) {
 }
 
 //run regular shell commands
+//argList is the list that holds the commands
 void runSh(char **argList) {
     pid_t pid = fork();                                          //spawn new process
 
@@ -64,10 +68,26 @@ void runSh(char **argList) {
 }
 
 //run piped commands
+//argList is the list that holds the pipes commands
 void runPipe(char **argList) {
+    //checks if more than 1 pipe exists
+    int pipeCount = 0;
+    int k = 0;
+    const char pipeChar[] = "|";
+    while (argList[k] != NULL) {
+        if (strcmp(argList[k], pipeChar) == 0) {
+            pipeCount++;
+        }
+
+        k++;
+    }
+
+    if (pipeCount > 1) {
+        return;
+    }
+
     char **command1 = malloc(sizeof(char *) * 2);                //creating first command array
     char **command2 = malloc(sizeof(char *) * 2);                //creating second command array
-    const char pipeChar[] = "|";
     int i = 0;
     int j = 0;
 
@@ -157,6 +177,7 @@ char *readLine() {
 #define MAX_NUM_ARGUMENTS 64
 
 //parse the input and figure out which type of execution to run
+//inputLine is the line read from the console
 char **parseInput(char *inputLine) {
     char **argList = malloc(sizeof(char *) * MAX_NUM_ARGUMENTS);
     char *argument;
@@ -176,6 +197,7 @@ char **parseInput(char *inputLine) {
 }
 
 //process input to figure out which type of execution is needed
+//argList is the list that holds the commands. these are interpreted and are acted upton
 int processInput(char **argList) {
     //if built in commands
     const char *builtInCommands[4];
