@@ -12,7 +12,7 @@ After compilation, to run the program, enter the following command:
  There are four built in commands. These can be accessed by typing:
     help
     
-cd is a built in commands which will allow you to change directories.
+cd is a built in command which will allow you to change directories.
 
 Other than the four built in commands, regular shell commands can also be executed, for example:
     grep -c char shell.c
@@ -22,6 +22,6 @@ In order to pipe two simple commands, enter the command as you would in the linu
 can be entered to pipe the two commands.
 
 To quit the shell program, type any of the following commands: 
-    exit
-    quit
+    exit,
+    quit,
 or press control + d on the keyboard.
