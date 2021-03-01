@@ -28,6 +28,7 @@ void exitSh() {
     exit(0);
 }
 
+//run built in commands
 void runBuiltIn(char **argList) {
     const char *builtInCommands[4];
     builtInCommands[0] = "help";
@@ -46,12 +47,13 @@ void runBuiltIn(char **argList) {
     }
 }
 
+//run regular shell commands
 void runSh(char **argList) {
-    pid_t pid = fork();
+    pid_t pid = fork();                                          //spawn new process
 
     if (pid == -1) {
         perror("Error:");
-    } else if (pid == 0) {
+    } else if (pid == 0) {                                       //execute commands from child process
         if (execvp(argList[0], argList) == -1) {
             printf("%s: command not found...\n", argList[0]);
         }
@@ -61,8 +63,71 @@ void runSh(char **argList) {
     }
 }
 
+//run piped commands
 void runPipe(char **argList) {
-    printf("this is pipe\n");
+    char **command1 = malloc(sizeof(char *) * 2);                //creating first command array
+    char **command2 = malloc(sizeof(char *) * 2);                //creating second command array
+    const char pipeChar[] = "|";
+    int i = 0;
+    int j = 0;
+
+    while(strcmp(argList[i], pipeChar) != 0) {
+        command1[i] = argList[i];
+        i++;
+    }
+
+    i++;
+
+    while (argList[i] != NULL) {
+        command2[j] = argList[i];
+        i++;
+        j++;
+    }
+
+    //initialize the pipes
+    int fd[2];
+    pid_t pid;
+
+    //check for piping errors
+    if(pipe(fd) == -1){
+        perror("Error:");
+        exit(1);
+    }
+
+    //first pipe from first process
+    if (fork() == 0) {
+        close(STDOUT_FILENO);
+        dup(fd[1]);
+        close(fd[0]);
+        close(fd[0]);
+
+        if (execvp(command1[0], command1) == -1) {
+            printf("%s: command not found...\n", argList[0]);
+        }
+        exit(1);
+    }
+
+    //second pipe from second process
+    if (fork() == 0) {
+        close(STDIN_FILENO);
+        dup(fd[0]);
+        close(fd[1]);
+        close(fd[0]);
+
+        if (execvp(command2[0], command2) == -1) {
+            printf("%s: command not found...\n", argList[0]);
+        }
+        exit(1);
+    }
+
+    //close botch pipes and wait for processes to complete
+    close(fd[0]);
+    close(fd[1]);
+    wait(0);
+    wait(0);
+
+    free(command1);
+    free(command2);
 }
 
 //prints the prompt before every command
