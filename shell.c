@@ -1,4 +1,4 @@
-//#include <sys/wait.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -85,7 +85,7 @@ int processInput(char **argList) {
     //if pipe command return 2
     i = 0;
     const char pipe[] = "|";
-    while(argList[i] != NULL){
+    while (argList[i] != NULL) {
         if (strcmp(argList[i], pipe) == 0) {
             return 2;
         }
@@ -105,13 +105,13 @@ void helpSh() {
 
 //built in cd command
 void cdSh(char *newDir) {
-    if(newDir == NULL){
-        printf("please specify a directory\n");
+    if (newDir == NULL) {
+        printf("Please enter a file or directory.\n");
         return;
     }
 
-    if(chdir(newDir) != 0){
-        printf("%s is not a valid directory\n", newDir);
+    if (chdir(newDir) != 0) {
+        perror("Error:");
     }
 }
 
@@ -139,7 +139,18 @@ void runBuiltIn(char **argList) {
 }
 
 void runSh(char **argList) {
-    printf("this is shell\n");
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("Error:");
+    } else if (pid == 0) {
+        if (execvp(argList[0], argList) == -1) {
+            perror("Error:");
+        }
+        exit(0);
+    } else {
+        wait(NULL);
+    }
 }
 
 void runPipe(char **argList) {
@@ -159,7 +170,7 @@ void shell() {
 
         //removing \n character from input line
         inputLen = strlen(inputLine);
-        inputLine[inputLen-1] = 0;
+        inputLine[inputLen - 1] = 0;
 
         argList = parseInput(inputLine);  //getting array of arguments
 
