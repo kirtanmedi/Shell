@@ -4,13 +4,65 @@
 #include <stdio.h>
 #include <string.h>
 
-void printArray(char **array) {
-    int i = 0;
-    while (array[i] != NULL) {
-        printf("%d: %s ", i, array[i]);
-        i++;
+//built in help command
+void helpSh() {
+    printf("This the help menu\n"
+           "Built in commands: help, cd, exit, quit\n"
+           "Other commands can be used by simply typing them and pressing enter\n");
+}
+
+//built in cd command
+void cdSh(char *newDir) {
+    if (newDir == NULL) {
+        printf("Please enter a file or directory.\n");
+        return;
     }
-    printf("\n");
+
+    if (chdir(newDir) != 0) {
+        perror("Error:");
+    }
+}
+
+//built in exit command
+void exitSh() {
+    exit(0);
+}
+
+void runBuiltIn(char **argList) {
+    const char *builtInCommands[4];
+    builtInCommands[0] = "help";
+    builtInCommands[1] = "cd";
+    builtInCommands[2] = "exit";
+    builtInCommands[3] = "quit";
+
+    if (strcmp(argList[0], builtInCommands[0]) == 0) {          //run the help command
+        helpSh();
+    } else if (strcmp(argList[0], builtInCommands[1]) == 0) {   //run the cd command
+        cdSh(argList[1]);
+    } else if (strcmp(argList[0], builtInCommands[2]) == 0) {   //exit
+        exitSh();
+    } else if (strcmp(argList[0], builtInCommands[3]) == 0) {   //exit
+        exitSh();
+    }
+}
+
+void runSh(char **argList) {
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("Error:");
+    } else if (pid == 0) {
+        if (execvp(argList[0], argList) == -1) {
+            printf("%s: command not found...\n", argList[0]);
+        }
+        exit(0);
+    } else {
+        wait(NULL);
+    }
+}
+
+void runPipe(char **argList) {
+    printf("this is pipe\n");
 }
 
 //prints the prompt before every command
@@ -18,15 +70,6 @@ void printPrompt() {
     char dir[1024];
     getcwd(dir, sizeof(dir));
     printf("%s>", dir);
-}
-
-//checks if "exit" or "quit" is entered
-void checkExit(const char *inputLine) {
-    char exitInput[] = "exit";
-    char quitInput[] = "quit";
-    if (strcmp(inputLine, exitInput) == 10 || strcmp(inputLine, quitInput) == 10) {
-        exit(0);
-    }
 }
 
 #define MAX_INPUT_LENGTH 1024
@@ -94,67 +137,6 @@ int processInput(char **argList) {
 
     //if shell command return 1
     return 1;
-}
-
-//built in help command
-void helpSh() {
-    printf("This the help menu\n"
-           "Built in commands: help, cd, exit, quit\n"
-           "Other commands can be used by simply typing them and pressing enter\n");
-}
-
-//built in cd command
-void cdSh(char *newDir) {
-    if (newDir == NULL) {
-        printf("Please enter a file or directory.\n");
-        return;
-    }
-
-    if (chdir(newDir) != 0) {
-        perror("Error:");
-    }
-}
-
-//built in exit command
-void exitSh() {
-    exit(0);
-}
-
-void runBuiltIn(char **argList) {
-    const char *builtInCommands[4];
-    builtInCommands[0] = "help";
-    builtInCommands[1] = "cd";
-    builtInCommands[2] = "exit";
-    builtInCommands[3] = "quit";
-
-    if (strcmp(argList[0], builtInCommands[0]) == 0) {          //run the help command
-        helpSh();
-    } else if (strcmp(argList[0], builtInCommands[1]) == 0) {   //run the cd command
-        cdSh(argList[1]);
-    } else if (strcmp(argList[0], builtInCommands[2]) == 0) {   //exit
-        exitSh();
-    } else if (strcmp(argList[0], builtInCommands[3]) == 0) {   //exit
-        exitSh();
-    }
-}
-
-void runSh(char **argList) {
-    pid_t pid = fork();
-
-    if (pid == -1) {
-        perror("Error:");
-    } else if (pid == 0) {
-        if (execvp(argList[0], argList) == -1) {
-            perror("Error:");
-        }
-        exit(0);
-    } else {
-        wait(NULL);
-    }
-}
-
-void runPipe(char **argList) {
-    printf("this is pipe\n");
 }
 
 //the main looping logic of the shell
