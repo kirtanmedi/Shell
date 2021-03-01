@@ -95,15 +95,23 @@ int processInput(char **argList) {
 }
 
 void helpSh() {
-    printf("this is help\n");
+    printf("This the help menu\n"
+           "Built in commands: help, cd, exit, quit\n");
 }
 
-void cdSh() {
-    printf("this is cd\n");
+void cdSh(char *newDir) {
+    if(newDir == NULL){
+        printf("please specify a directory\n");
+        return;
+    }
+
+    if(chdir(newDir) != 0){
+        printf("%s is not a valid directory\n", newDir);
+    }
 }
 
 void exitSh() {
-    printf("this is exit\n");
+    exit(0);
 }
 
 void runBuiltIn(char **argList) {
@@ -113,13 +121,13 @@ void runBuiltIn(char **argList) {
     builtInCommands[2] = "exit";
     builtInCommands[3] = "quit";
 
-    if (strcmp(argList[0], builtInCommands[0]) == 0) {
+    if (strcmp(argList[0], builtInCommands[0]) == 0) {          //run the help command
         helpSh();
-    } else if (strcmp(argList[0], builtInCommands[1]) == 0) {
-        cdSh();
-    } else if (strcmp(argList[0], builtInCommands[2]) == 0) {
+    } else if (strcmp(argList[0], builtInCommands[1]) == 0) {   //run the cd command
+        cdSh(argList[1]);
+    } else if (strcmp(argList[0], builtInCommands[2]) == 0) {   //exit
         exitSh();
-    } else if (strcmp(argList[0], builtInCommands[3]) == 0) {
+    } else if (strcmp(argList[0], builtInCommands[3]) == 0) {   //exit
         exitSh();
     }
 }
