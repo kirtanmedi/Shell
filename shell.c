@@ -82,23 +82,28 @@ int processInput(char **argList) {
         }
     }
 
-    //if shell command return 1
-    if(argList[1] == NULL){
-        return 1;
+    //if pipe command return 2
+    i = 0;
+    const char pipe[] = "|";
+    while(argList[i] != NULL){
+        if (strcmp(argList[i], pipe) == 0) {
+            return 2;
+        }
+        i++;
     }
 
-    //if pipe command return 2
-    const char pipe[] = "|";
-    if (strcmp(argList[1], pipe) == 0) {
-        return 2;
-    }
+    //if shell command return 1
+    return 1;
 }
 
+//built in help command
 void helpSh() {
     printf("This the help menu\n"
-           "Built in commands: help, cd, exit, quit\n");
+           "Built in commands: help, cd, exit, quit\n"
+           "Other commands can be used by simply typing them and pressing enter\n");
 }
 
+//built in cd command
 void cdSh(char *newDir) {
     if(newDir == NULL){
         printf("please specify a directory\n");
@@ -110,6 +115,7 @@ void cdSh(char *newDir) {
     }
 }
 
+//built in exit command
 void exitSh() {
     exit(0);
 }
@@ -150,9 +156,14 @@ void shell() {
     while (1) {
         printPrompt();
         inputLine = readLine();
+
+        //removing \n character from input line
         inputLen = strlen(inputLine);
         inputLine[inputLen-1] = 0;
-        argList = parseInput(inputLine);
+
+        argList = parseInput(inputLine);  //getting array of arguments
+
+        //getting the correct command type and running it
         commandType = processInput(argList);
         if (commandType == 0) {           //to run built in commands
             runBuiltIn(argList);
@@ -161,6 +172,8 @@ void shell() {
         } else if (commandType == 2) {    //to run piped commands
             runPipe(argList);
         }
+
+        //freeing space of inputLine and argList
         free(inputLine);
         free(argList);
     }
